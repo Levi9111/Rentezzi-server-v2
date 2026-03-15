@@ -16,7 +16,7 @@ const userSchema = new Schema<TUser>(
       trim: true,
       match: [
         BD_PHONE_REGEX,
-        'Please provide a valid Bangladeshi phone number (e.g., 01712345678)',
+        'Please provide a valid phone number (e.g., 01712345678)',
       ],
     },
     password: { type: String, required: true, select: false },

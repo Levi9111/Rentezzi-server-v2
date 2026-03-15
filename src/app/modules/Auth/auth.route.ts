@@ -24,4 +24,6 @@ router.post(
 router.post('/logout', authenticate, AuthController.logout);
 router.get('/me', authenticate, AuthController.getMe);
 
-export default router;
+const AuthRoutes = router;
+
+export default AuthRoutes;
