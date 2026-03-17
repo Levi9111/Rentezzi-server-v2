@@ -27,7 +27,7 @@ const userSchema = new Schema<TUser>(
       {
         tokenHash: { type: String, required: true },
         expiresAt: { type: Date, required: true },
-        deviceInfo: { type: String, optional: true },
+        deviceInfo: { type: String },
       },
     ],
   },

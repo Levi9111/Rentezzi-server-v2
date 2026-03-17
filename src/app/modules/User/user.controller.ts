@@ -34,11 +34,13 @@ const updateUser = catchAsync(async (req, res) => {
   }
 
   const { name, phone, imgUrl } = req.body; // whitelist allowed fields
-  const result = await UserService.updateUserInDB(userId, {
-    name,
-    phone,
-    imgUrl,
-  });
+  const updateData: Partial<{ name: string; phone: string; imgUrl: string }> =
+    {};
+  if (name !== undefined) updateData.name = name;
+  if (phone !== undefined) updateData.phone = phone;
+  if (imgUrl !== undefined) updateData.imgUrl = imgUrl;
+
+  const result = await UserService.updateUserInDB(userId, updateData);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,

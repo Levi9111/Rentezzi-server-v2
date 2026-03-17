@@ -32,6 +32,7 @@ export const cleanupRefreshTokens = (
   let validTokens = refreshTokens.filter((entry) => entry.expiresAt > now);
   // Keep only the most recent MAX_REFRESH_TOKENS
   if (validTokens.length > MAX_REFRESH_TOKENS) {
+    validTokens.sort((a, b) => a.expiresAt.getTime() - b.expiresAt.getTime());
     validTokens = validTokens.slice(-MAX_REFRESH_TOKENS);
   }
   return validTokens;
