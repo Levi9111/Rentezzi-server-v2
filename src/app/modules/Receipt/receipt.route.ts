@@ -17,6 +17,8 @@ router.get('/', authenticate, ReceiptController.getAllReceipts);
 
 router.get('/:id', authenticate, ReceiptController.getReceiptById);
 
+router.post('/:id/send-pdf', authenticate, ReceiptController.sendReceiptPdf);
+
 const ReceiptRoutes = router;
 
 export default ReceiptRoutes;

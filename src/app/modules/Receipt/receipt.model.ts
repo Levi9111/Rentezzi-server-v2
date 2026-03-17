@@ -8,7 +8,11 @@ const receiptSchema = new Schema<TReceipt>(
     apartmentName: { type: String, required: true },
     unit: { type: String, required: true },
     month: { type: String, required: true },
-    amount: { type: Number, required: true },
+    amount: {
+      type: Number,
+      required: true,
+      min: [0, 'Amount cannot be negative'],
+    },
 
     ownerId: {
       type: Schema.Types.ObjectId,

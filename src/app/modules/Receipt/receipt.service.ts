@@ -3,15 +3,26 @@ import { TReceipt } from './receipt.interface';
 import AppError from '../../errors/AppError';
 import { StatusCodes } from 'http-status-codes';
 import QueryBuilder from '../../builder/Querybuilder';
+import mongoose from 'mongoose';
+import { fileUploader } from '../../utils/fileUploader';
 
-// later we will integrate PDF + Cloudinary
-// import { generatePDF } from './receipt.utils';
-// import { uploadToCloudinary } from '../../utils/cloudinary';
+const createReceiptIntoDB = async (
+  payload: TReceipt,
+  userId: string,
+  file: Express.Multer.File,
+) => {
+  if (!file) {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'PDF file is required');
+  }
 
-const createReceiptIntoDB = async (payload: TReceipt, userId: string) => {
+  // 1️⃣ Upload to Cloudinary
+  const uploadResult = await fileUploader.uploadToCloudinary(file);
+
+  // 2️⃣ Save to DB
   const receipt = await Receipt.create({
     ...payload,
     ownerId: userId,
+    pdfUrl: uploadResult.secure_url,
   });
 
   return receipt;
@@ -24,7 +35,6 @@ const getAllReceiptsFromDB = async (
 ) => {
   const baseQuery = Receipt.find({
     ownerId: userId,
-    isDeleted: { $ne: true },
   });
 
   const queryBuilder = new QueryBuilder(baseQuery, query)
@@ -37,8 +47,11 @@ const getAllReceiptsFromDB = async (
   return await queryBuilder.modelQuery;
 };
 
-// ✅ Get Single Receipt
 const getReceiptByIdFromDB = async (id: string, userId: string) => {
+  if (!mongoose.isValidObjectId(id)) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'Receipt not found');
+  }
+
   const receipt = await Receipt.findOne({
     _id: id,
     ownerId: userId,
@@ -52,8 +65,13 @@ const getReceiptByIdFromDB = async (id: string, userId: string) => {
   return receipt;
 };
 
+const sendReceiptPdf = async (id: string, userId: string) => {
+  console.log('Sending PDF for receipt ID:', id, 'and user ID:', userId);
+};
+
 export const ReceiptService = {
   createReceiptIntoDB,
   getAllReceiptsFromDB,
   getReceiptByIdFromDB,
+  sendReceiptPdf,
 };
