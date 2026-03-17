@@ -7,7 +7,7 @@ const createReceiptValidationSchema = z.object({
     apartmentName: z.string(),
     unit: z.string(),
     month: z.string(),
-    amount: z.number(),
+    amount: z.coerce.number(),
   }),
 });
 
