@@ -1,27 +1,27 @@
 import express from 'express';
-import { AuthController } from './user.controller';
+import { UserController } from './user.controller';
 import { authenticate } from '../../middlewares/auth';
 import validateRequest from '../../middlewares/validateRequest';
-import { AuthValidation } from './user.validation';
+import { UserValidation } from './user.validation';
 
 const router = express.Router();
 
 router.post(
   '/register',
-  validateRequest(AuthValidation.registerValidationSchema),
-  AuthController.register,
+  validateRequest(UserValidation.registerValidationSchema),
+  UserController.register,
 );
 
 // User management routes
 router.put(
   '/update',
   authenticate,
-  validateRequest(AuthValidation.updateUserValidationSchema),
-  AuthController.updateUser,
+  validateRequest(UserValidation.updateUserValidationSchema),
+  UserController.updateUser,
 );
-router.delete('/delete', authenticate, AuthController.deleteUser);
-router.get('/get-all-users', authenticate, AuthController.getAllUsers);
-router.get('/:id', authenticate, AuthController.getUserById);
+router.delete('/delete', authenticate, UserController.deleteUser);
+router.get('/', authenticate, UserController.getAllUsers);
+router.get('/:id', authenticate, UserController.getUserById);
 
 const UserRoutes = router;
 

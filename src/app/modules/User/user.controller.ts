@@ -33,7 +33,12 @@ const updateUser = catchAsync(async (req, res) => {
     throw new AppError(StatusCodes.UNAUTHORIZED, 'Unauthorized');
   }
 
-  const result = await UserService.updateUserInDB(userId, req.body);
+  const { name, phone, imgUrl } = req.body; // whitelist allowed fields
+  const result = await UserService.updateUserInDB(userId, {
+    name,
+    phone,
+    imgUrl,
+  });
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -91,7 +96,7 @@ const getUserById = catchAsync(async (req, res) => {
   });
 });
 
-export const AuthController = {
+export const UserController = {
   register,
   updateUser,
   deleteUser,

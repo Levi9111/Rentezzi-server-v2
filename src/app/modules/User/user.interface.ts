@@ -5,5 +5,9 @@ export type TUser = {
   address?: string;
   imgUrl?: string;
   isDeleted?: boolean;
-  refreshTokens: string[];
+  refreshTokens: Array<{
+    tokenHash: string;
+    expiresAt: Date;
+    deviceInfo?: string;
+  }>;
 };

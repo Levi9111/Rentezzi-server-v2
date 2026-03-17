@@ -2,6 +2,40 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../../config';
 import { StatusCodes } from 'http-status-codes';
 import AppError from '../../errors/AppError';
+import bcrypt from 'bcrypt';
+
+const MAX_REFRESH_TOKENS = 5;
+
+// ✅ Hash refresh token before storing
+export const hashRefreshToken = async (token: string): Promise<string> => {
+  return bcrypt.hash(token, 10);
+};
+
+// ✅ Compare incoming token with stored hash
+export const verifyRefreshTokenHash = async (
+  token: string,
+  tokenHash: string,
+): Promise<boolean> => {
+  return bcrypt.compare(token, tokenHash);
+};
+
+// ✅ Clean up expired tokens and enforce max token limit
+export const cleanupRefreshTokens = (
+  refreshTokens: Array<{
+    tokenHash: string;
+    expiresAt: Date;
+    deviceInfo?: string;
+  }>,
+): Array<{ tokenHash: string; expiresAt: Date; deviceInfo?: string }> => {
+  const now = new Date();
+  // Remove expired tokens
+  let validTokens = refreshTokens.filter((entry) => entry.expiresAt > now);
+  // Keep only the most recent MAX_REFRESH_TOKENS
+  if (validTokens.length > MAX_REFRESH_TOKENS) {
+    validTokens = validTokens.slice(-MAX_REFRESH_TOKENS);
+  }
+  return validTokens;
+};
 
 export const verifyToken = (token: string, secret: string): { sub: string } => {
   try {
@@ -15,6 +49,9 @@ export const verifyToken = (token: string, secret: string): { sub: string } => {
     }
     throw new AppError(StatusCodes.BAD_REQUEST, 'Invalid token payload');
   } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
     throw new AppError(StatusCodes.UNAUTHORIZED, 'Unauthorized access!');
   }
 };

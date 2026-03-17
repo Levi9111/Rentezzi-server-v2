@@ -23,7 +23,13 @@ const userSchema = new Schema<TUser>(
     address: { type: String },
     imgUrl: { type: String },
     isDeleted: { type: Boolean, default: false },
-    refreshTokens: [{ type: String }],
+    refreshTokens: [
+      {
+        tokenHash: { type: String, required: true },
+        expiresAt: { type: Date, required: true },
+        deviceInfo: { type: String, optional: true },
+      },
+    ],
   },
   { timestamps: true },
 );
@@ -35,6 +41,6 @@ userSchema.pre('save', async function () {
 
   this.password = await bcrypt.hash(
     this.password,
-    Number(config.bcrypt_salt_rounds),
+    Number(config.bcrypt_salt_rounds) || 10,
   );
 });
