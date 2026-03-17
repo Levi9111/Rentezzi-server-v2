@@ -3,12 +3,14 @@ import { ReceiptController } from './receipt.controller';
 import { authenticate } from '../../middlewares/auth';
 import validateRequest from '../../middlewares/validateRequest';
 import { ReceiptValidation } from './receipt.validation';
+import { fileUploader } from '../../utils/fileUploader';
 
 const router = express.Router();
 
 router.post(
   '/',
   authenticate,
+  fileUploader.upload.single('pdf'),
   validateRequest(ReceiptValidation.createReceiptValidationSchema),
   ReceiptController.createReceipt,
 );
