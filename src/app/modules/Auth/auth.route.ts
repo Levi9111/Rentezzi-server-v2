@@ -1,29 +1,33 @@
-import express from 'express';
-import { AuthController } from './auth.controller';
+import { Router } from 'express';
+import { AuthControllers } from './auth.controller';
+import { AuthValidation } from './auth.validation';
 import { authenticate } from '../../middlewares/auth';
 import validateRequest from '../../middlewares/validateRequest';
-import { AuthValidation } from './auth.validation';
 
-const router = express.Router();
+const router = Router();
 
+// ─── Public Routes ────────────────────────────────────────────────────────────
 router.post(
   '/register',
   validateRequest(AuthValidation.registerValidationSchema),
-  AuthController.register,
+  AuthControllers.register,
 );
+
 router.post(
   '/login',
   validateRequest(AuthValidation.loginValidationSchema),
-  AuthController.login,
+  AuthControllers.login,
 );
-router.post(
-  '/refresh-token',
-  validateRequest(AuthValidation.refreshTokenValidationSchema),
-  AuthController.refreshToken,
-);
-router.post('/logout', authenticate, AuthController.logout);
-router.get('/me', authenticate, AuthController.getMe);
 
-const AuthRoutes = router;
+// router.post(
+//   '/refresh-token',
+//   validateRequest(AuthValidation.refreshTokenValidationSchema),
+//   AuthControllers.refreshToken,
+// );
 
-export default AuthRoutes;
+// ─── Protected Routes ─────────────────────────────────────────────────────────
+router.get('/me', authenticate, AuthControllers.getMe);
+
+router.post('/logout', authenticate, AuthControllers.logout);
+
+export const AuthRoutes = router;

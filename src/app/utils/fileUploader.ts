@@ -35,9 +35,11 @@ const uploadToCloudinary = async (
   folder = 'rentezzi/receipts',
 ): Promise<UploadApiResponse> => {
   // Unique + sanitized filename
-  const publicId = `${Date.now()}-${path
+  const sanitizedName = path
     .parse(file.originalname)
-    .name.replace(/\s+/g, '_')}`;
+    .name.replace(/[^a-zA-Z0-9_-]/g, '_')
+    .substring(0, 100); // Limit length
+  const publicId = `${Date.now()}-${sanitizedName}`;
 
   try {
     const result = await cloudinary.uploader.upload(file.path, {
@@ -50,7 +52,7 @@ const uploadToCloudinary = async (
     return result;
   } catch (error) {
     console.error('Cloudinary Upload Error:', error);
-    throw error as UploadApiErrorResponse;
+    throw error;
   } finally {
     // Always delete temp file (non-blocking)
     await fs.promises.unlink(file.path).catch(() => {});

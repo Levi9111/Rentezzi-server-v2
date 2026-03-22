@@ -15,8 +15,19 @@ const createReceiptIntoDB = async (
     throw new AppError(StatusCodes.BAD_REQUEST, 'PDF file is required');
   }
 
+  if (file.mimetype !== 'application/pdf') {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'Only PDF files are allowed');
+  }
+
   // 1️⃣ Upload to Cloudinary
   const uploadResult = await fileUploader.uploadToCloudinary(file);
+
+  if (!uploadResult?.secure_url) {
+    throw new AppError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      'Failed to upload PDF file',
+    );
+  }
 
   // 2️⃣ Save to DB
   const receipt = await Receipt.create({

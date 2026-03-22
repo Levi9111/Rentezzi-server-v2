@@ -1,10 +1,12 @@
+import { Request, Response } from 'express';
+import { StatusCodes } from 'http-status-codes';
 import { catchAsync } from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
-import { StatusCodes } from 'http-status-codes';
 import AppError from '../../errors/AppError';
 import { AuthService } from './auth.service';
 
-const register = catchAsync(async (req, res) => {
+// ─── Register ─────────────────────────────────────────────────────────────────
+const register = catchAsync(async (req: Request, res: Response) => {
   const { name, phone, password } = req.body;
 
   const { user, tokens } = await AuthService.registerUserIntoDB(
@@ -14,7 +16,7 @@ const register = catchAsync(async (req, res) => {
   );
 
   sendResponse(res, {
-    statusCode: StatusCodes.OK,
+    statusCode: StatusCodes.CREATED,
     success: true,
     message: 'User registered successfully',
     data: {
@@ -28,10 +30,11 @@ const register = catchAsync(async (req, res) => {
   });
 });
 
-const login = catchAsync(async (req, res) => {
+// ─── Login ────────────────────────────────────────────────────────────────────
+const login = catchAsync(async (req: Request, res: Response) => {
   const { phone, password } = req.body;
 
-  const { user, tokens } = await AuthService.login(phone, password);
+  const { user, tokens } = await AuthService.loginFromDB(phone, password);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -48,48 +51,50 @@ const login = catchAsync(async (req, res) => {
   });
 });
 
-const refreshToken = catchAsync(async (req, res) => {
-  const { refreshToken } = req.body;
+// ─── Refresh Token ────────────────────────────────────────────────────────────
+// const refreshToken = catchAsync(async (req: Request, res: Response) => {
+//   const { refreshToken } = req.body;
+//
+//   const tokens = await AuthService.refreshTokenFromDB(refreshToken);
+//
+//   sendResponse(res, {
+//     statusCode: StatusCodes.OK,
+//     success: true,
+//     message: 'Token refreshed successfully',
+//     data: tokens,
+//   });
+// });
 
-  const tokens = await AuthService.refreshToken(refreshToken);
-
-  sendResponse(res, {
-    statusCode: StatusCodes.OK,
-    success: true,
-    data: tokens,
-  });
-});
-
-const logout = catchAsync(async (req, res) => {
+// ─── Logout ───────────────────────────────────────────────────────────────────
+const logout = catchAsync(async (req: Request, res: Response) => {
   await AuthService.logout(req);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
-    message: 'Logged out',
+    message: 'Logged out successfully',
   });
 });
 
-const getMe = catchAsync(async (req, res) => {
-  const { userId } = req;
-
-  if (!userId)
+// ─── Get Me ───────────────────────────────────────────────────────────────────
+const getMe = catchAsync(async (req: Request, res: Response) => {
+  if (!req.userId)
     throw new AppError(StatusCodes.UNAUTHORIZED, 'Unauthorized access!');
 
-  const user = await AuthService.getMe(userId);
+  const result = await AuthService.getMeFromDB(req.userId);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
     message: 'User profile retrieved successfully',
-    data: { user },
+    data: result,
   });
 });
 
-export const AuthController = {
+export const AuthControllers = {
   register,
   login,
-  refreshToken,
+  // refreshToken,
   logout,
   getMe,
 };

@@ -1,11 +1,13 @@
-import jwt, { JwtPayload } from 'jsonwebtoken';
-import config from '../../config';
+import jwt from 'jsonwebtoken';
 import { StatusCodes } from 'http-status-codes';
 import AppError from '../../errors/AppError';
+import config from '../../config';
 
+// ─── Verify Token ─────────────────────────────────────────────────────────────
 export const verifyToken = (token: string, secret: string): { sub: string } => {
   try {
     const decoded = jwt.verify(token, secret);
+
     if (
       typeof decoded === 'object' &&
       decoded !== null &&
@@ -13,12 +15,14 @@ export const verifyToken = (token: string, secret: string): { sub: string } => {
     ) {
       return { sub: decoded.sub };
     }
-    throw new AppError(StatusCodes.BAD_REQUEST, 'Invalid token payload');
-  } catch (error) {
+
+    throw new AppError(StatusCodes.UNAUTHORIZED, 'Invalid token payload');
+  } catch {
     throw new AppError(StatusCodes.UNAUTHORIZED, 'Unauthorized access!');
   }
 };
 
+// ─── Generate Tokens ──────────────────────────────────────────────────────────
 export const generateTokens = (userId: string) => {
   if (!config.jwt_access_secret || !config.jwt_refresh_secret) {
     throw new AppError(
