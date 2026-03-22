@@ -1,5 +1,5 @@
 import express from 'express';
-import { ReceiptController } from './receipt.controller';
+import { ReceiptControllers } from './receipt.controller';
 import { authenticate } from '../../middlewares/auth';
 import validateRequest from '../../middlewares/validateRequest';
 import { ReceiptValidation } from './receipt.validation';
@@ -12,14 +12,16 @@ router.post(
   authenticate,
   fileUploader.upload.single('pdf'),
   validateRequest(ReceiptValidation.createReceiptValidationSchema),
-  ReceiptController.createReceipt,
+  ReceiptControllers.createReceipt,
 );
 
-router.get('/', authenticate, ReceiptController.getAllReceipts);
+router.get('/', authenticate, ReceiptControllers.getAllReceipts);
 
-router.get('/:id', authenticate, ReceiptController.getReceiptById);
+router.get('/:id', authenticate, ReceiptControllers.getReceiptById);
 
-router.post('/:id/send-pdf', authenticate, ReceiptController.sendReceiptPdf);
+router.delete('/:id', authenticate, ReceiptControllers.deleteReceipt);
+
+router.get('/:id/download-pdf', authenticate, ReceiptControllers.downloadPdf);
 
 const ReceiptRoutes = router;
 
