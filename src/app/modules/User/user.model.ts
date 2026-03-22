@@ -1,12 +1,11 @@
 import bcrypt from 'bcrypt';
-
-import { Schema, model } from 'mongoose';
-import { TUser } from './user.interface';
+import { Schema, model, models } from 'mongoose';
+import { TUser, IUserModel } from './user.interface';
 import config from '../../config';
 
 const BD_PHONE_REGEX = /^01[3-9]\d{8}$/;
 
-const userSchema = new Schema<TUser>(
+const userSchema = new Schema<TUser, IUserModel>(
   {
     name: { type: String },
     phone: {
@@ -34,8 +33,7 @@ const userSchema = new Schema<TUser>(
   { timestamps: true },
 );
 
-export const User = model<TUser>('User', userSchema);
-
+// ─── Pre-save: Hash Password ──────────────────────────────────────────────────
 userSchema.pre('save', async function () {
   if (!this.isModified('password')) return;
 
@@ -44,3 +42,18 @@ userSchema.pre('save', async function () {
     Number(config.bcrypt_salt_rounds) || 10,
   );
 });
+
+// ─── Static: Find by Phone ────────────────────────────────────────────────────
+userSchema.statics.isUserExistsByPhone = async function (phone: string) {
+  return this.findOne({ phone, isDeleted: { $ne: true } }).select('+password');
+};
+
+// ─── Static: Compare Password ─────────────────────────────────────────────────
+userSchema.statics.isPasswordMatched = async function (
+  plain: string,
+  hashed: string,
+) {
+  return bcrypt.compare(plain, hashed);
+};
+
+export const User = models.User || model<TUser, IUserModel>('User', userSchema);

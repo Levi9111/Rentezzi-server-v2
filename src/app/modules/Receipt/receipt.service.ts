@@ -39,7 +39,9 @@ const createReceiptIntoDB = async (
   let propertyAddress = property.address;
 
   if (payload.unitId) {
-    const unit = property.units.find((u) => String(u._id) === payload.unitId);
+    const unit = property.units.find(
+      (u: any) => String(u._id) === payload.unitId,
+    );
 
     if (!unit) throw new AppError(StatusCodes.NOT_FOUND, 'Unit not found');
 

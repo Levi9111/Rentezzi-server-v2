@@ -1,0 +1,12 @@
+node_modules
+dist
+.env
+.git
+.gitignore
+.eslintignore
+.eslintrc.json
+.prettierrc.json
+*.log
+uploads
+README.md
+docker-compose.yml

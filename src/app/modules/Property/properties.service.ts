@@ -9,6 +9,7 @@ import {
   TAssignTenantBody,
   TClearTenantBody,
   TVacancySummary,
+  IPropertyModel,
 } from './properties.interface';
 
 // ─── Create Property ──────────────────────────────────────────────────────────
@@ -28,7 +29,10 @@ const getAllPropertiesFromDB = async (userId: string) => {
 
 // ─── Get Single Property ──────────────────────────────────────────────────────
 const getSinglePropertyFromDB = async (propertyId: string, userId: string) => {
-  const result = await Property.isPropertyOwnedByUser(propertyId, userId);
+  const result = await (Property as IPropertyModel).isPropertyOwnedByUser(
+    propertyId,
+    userId,
+  );
 
   if (!result) throw new AppError(StatusCodes.NOT_FOUND, 'Property not found');
 
@@ -41,7 +45,10 @@ const updatePropertyIntoDB = async (
   userId: string,
   payload: TUpdatePropertyBody,
 ) => {
-  const property = await Property.isPropertyOwnedByUser(propertyId, userId);
+  const property = await (Property as IPropertyModel).isPropertyOwnedByUser(
+    propertyId,
+    userId,
+  );
 
   if (!property)
     throw new AppError(StatusCodes.NOT_FOUND, 'Property not found');
@@ -69,7 +76,10 @@ const addUnitIntoDB = async (
   userId: string,
   payload: TAddUnitBody,
 ) => {
-  const property = await Property.isPropertyOwnedByUser(propertyId, userId);
+  const property = await (Property as IPropertyModel).isPropertyOwnedByUser(
+    propertyId,
+    userId,
+  );
 
   if (!property)
     throw new AppError(StatusCodes.NOT_FOUND, 'Property not found');
@@ -87,7 +97,10 @@ const updateUnitIntoDB = async (
   userId: string,
   payload: TUpdateUnitBody,
 ) => {
-  const property = await Property.isPropertyOwnedByUser(propertyId, userId);
+  const property = await (Property as IPropertyModel).isPropertyOwnedByUser(
+    propertyId,
+    userId,
+  );
 
   if (!property)
     throw new AppError(StatusCodes.NOT_FOUND, 'Property not found');
@@ -108,12 +121,17 @@ const deleteUnitFromDB = async (
   unitId: string,
   userId: string,
 ) => {
-  const property = await Property.isPropertyOwnedByUser(propertyId, userId);
+  const property = await (Property as IPropertyModel).isPropertyOwnedByUser(
+    propertyId,
+    userId,
+  );
 
   if (!property)
     throw new AppError(StatusCodes.NOT_FOUND, 'Property not found');
 
-  const unitIndex = property.units.findIndex((u) => String(u._id) === unitId);
+  const unitIndex = property.units.findIndex(
+    (u: any) => String(u._id) === unitId,
+  );
 
   if (unitIndex === -1)
     throw new AppError(StatusCodes.NOT_FOUND, 'Unit not found');
@@ -131,7 +149,10 @@ const assignTenantIntoDB = async (
   userId: string,
   payload: TAssignTenantBody,
 ) => {
-  const property = await Property.isPropertyOwnedByUser(propertyId, userId);
+  const property = await (Property as IPropertyModel).isPropertyOwnedByUser(
+    propertyId,
+    userId,
+  );
 
   if (!property)
     throw new AppError(StatusCodes.NOT_FOUND, 'Property not found');
@@ -159,7 +180,10 @@ const clearTenantFromDB = async (
   userId: string,
   payload: TClearTenantBody,
 ) => {
-  const property = await Property.isPropertyOwnedByUser(propertyId, userId);
+  const property = await (Property as IPropertyModel).isPropertyOwnedByUser(
+    propertyId,
+    userId,
+  );
 
   if (!property)
     throw new AppError(StatusCodes.NOT_FOUND, 'Property not found');
@@ -195,8 +219,8 @@ const getTenantHistoryFromDB = async (userId: string) => {
   ).lean();
 
   // Flatten all history entries across properties with property context
-  const history = properties.flatMap((property) =>
-    property.tenantHistory.map((entry) => ({
+  const history = properties.flatMap((property: any) =>
+    property.tenantHistory.map((entry: any) => ({
       ...entry,
       propertyId: property._id,
       propertyName: property.name,
@@ -217,7 +241,10 @@ const getPropertyTenantHistoryFromDB = async (
   propertyId: string,
   userId: string,
 ) => {
-  const property = await Property.isPropertyOwnedByUser(propertyId, userId);
+  const property = await (Property as IPropertyModel).isPropertyOwnedByUser(
+    propertyId,
+    userId,
+  );
 
   if (!property)
     throw new AppError(StatusCodes.NOT_FOUND, 'Property not found');
