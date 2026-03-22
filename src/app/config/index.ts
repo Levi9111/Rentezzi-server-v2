@@ -18,4 +18,12 @@ export default {
   cloudinary_api_key: process.env.CLOUDINARY_API_KEY,
   cloudinary_api_secret: process.env.CLOUDINARY_API_SECRET,
   cloudinary_url: process.env.CLOUDINARY_URL,
+
+  jwt_otp_secret: process.env.JWT_OTP_SECRET,
+
+  whatsapp_provider: process.env.WHATSAPP_PROVIDER,
+
+  twilio_account_sid: process.env.TWILIO_ACCOUNT_SID,
+  twilio_auth_token: process.env.TWILIO_AUTH_TOKEN,
+  twilio_whatsapp_number: process.env.TWILIO_WHATSAPP_NUMBER, // whatsapp:+14155238886
 };

@@ -5,15 +5,40 @@ import sendResponse from '../../utils/sendResponse';
 import AppError from '../../errors/AppError';
 import { AuthService } from './auth.service';
 
+// ─── Send OTP ─────────────────────────────────────────────────────────────────
+const sendOtp = catchAsync(async (req: Request, res: Response) => {
+  const { phone, purpose } = req.body;
+  await AuthService.sendOtp({ phone, purpose });
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: `OTP sent to WhatsApp number ${req.body.phone}`,
+  });
+});
+
+// ─── Verify OTP ───────────────────────────────────────────────────────────────
+const verifyOtp = catchAsync(async (req: Request, res: Response) => {
+  const { phone, otp, purpose } = req.body;
+  const result = await AuthService.verifyOtp({ phone, otp, purpose });
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'OTP verified successfully',
+    data: result, // { otpToken }
+  });
+});
+
 // ─── Register ─────────────────────────────────────────────────────────────────
 const register = catchAsync(async (req: Request, res: Response) => {
-  const { name, phone, password } = req.body;
-
-  const { user, tokens } = await AuthService.registerUserIntoDB(
+  const { name, phone, password, otpToken } = req.body;
+  const { user, tokens } = await AuthService.registerUserIntoDB({
     name,
     phone,
     password,
-  );
+    otpToken,
+  });
 
   sendResponse(res, {
     statusCode: StatusCodes.CREATED,
@@ -33,7 +58,6 @@ const register = catchAsync(async (req: Request, res: Response) => {
 // ─── Login ────────────────────────────────────────────────────────────────────
 const login = catchAsync(async (req: Request, res: Response) => {
   const { phone, password } = req.body;
-
   const { user, tokens } = await AuthService.loginFromDB(phone, password);
 
   sendResponse(res, {
@@ -51,19 +75,20 @@ const login = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// ─── Refresh Token ────────────────────────────────────────────────────────────
-// const refreshToken = catchAsync(async (req: Request, res: Response) => {
-//   const { refreshToken } = req.body;
-//
-//   const tokens = await AuthService.refreshTokenFromDB(refreshToken);
-//
-//   sendResponse(res, {
-//     statusCode: StatusCodes.OK,
-//     success: true,
-//     message: 'Token refreshed successfully',
-//     data: tokens,
-//   });
-// });
+// ─── Change Password ──────────────────────────────────────────────────────────
+const changePassword = catchAsync(async (req: Request, res: Response) => {
+  if (!req.userId)
+    throw new AppError(StatusCodes.UNAUTHORIZED, 'Unauthorized access!');
+
+  const { newPassword, otpToken } = req.body;
+  await AuthService.changePasswordIntoDB(req.userId, { newPassword, otpToken });
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Password changed successfully',
+  });
+});
 
 // ─── Logout ───────────────────────────────────────────────────────────────────
 const logout = catchAsync(async (req: Request, res: Response) => {
@@ -91,10 +116,27 @@ const getMe = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// ─── Refresh Token ────────────────────────────────────────────────────────────
+// const refreshToken = catchAsync(async (req: Request, res: Response) => {
+//   const { refreshToken } = req.body;
+//
+//   const tokens = await AuthService.refreshTokenFromDB(refreshToken);
+//
+//   sendResponse(res, {
+//     statusCode: StatusCodes.OK,
+//     success: true,
+//     message: 'Token refreshed successfully',
+//     data: tokens,
+//   });
+// });
+
 export const AuthControllers = {
+  sendOtp,
+  verifyOtp,
   register,
   login,
-  // refreshToken,
+  changePassword,
   logout,
   getMe,
+  // refreshToken
 };

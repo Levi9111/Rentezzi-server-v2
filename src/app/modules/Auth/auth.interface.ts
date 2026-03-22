@@ -21,11 +21,26 @@ export type TRegisterBody = {
   name: string;
   phone: string;
   password: string;
+  otpToken: string; // short-lived JWT returned by /verify-otp
 };
 
 export type TLoginBody = {
   phone: string;
   password: string;
+};
+
+export type TSendOtpBody = {
+  phone: string;
+};
+
+export type TVerifyOtpBody = {
+  phone: string;
+  otp: string;
+};
+
+export type TChangePasswordBody = {
+  newPassword: string;
+  otpToken: string; // short-lived JWT returned by /verify-otp
 };
 
 // ─── Return Types ─────────────────────────────────────────────────────────────
@@ -37,4 +52,10 @@ export type TAuthTokens = {
 export type TLoginResult = {
   user: Partial<TUser & Document>;
   tokens: TAuthTokens;
+};
+
+// ─── OTP Token Payload (short-lived JWT after OTP verified) ───────────────────
+export type TOtpTokenPayload = {
+  phone: string;
+  purpose: 'register' | 'change-password';
 };
