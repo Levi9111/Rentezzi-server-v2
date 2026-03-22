@@ -3,6 +3,7 @@ import UserRoutes from '../modules/User/user.route';
 
 import ReceiptRoutes from '../modules/Receipt/receipt.route';
 import { AuthRoutes } from '../modules/Auth/auth.route';
+import { PropertyRoutes } from '../modules/Property/properties.route';
 
 const router = Router();
 
@@ -20,6 +21,10 @@ const moduleRoutes = [
   {
     path: '/receipt',
     route: ReceiptRoutes,
+  },
+  {
+    path: '/property',
+    route: PropertyRoutes,
   },
 ];
 

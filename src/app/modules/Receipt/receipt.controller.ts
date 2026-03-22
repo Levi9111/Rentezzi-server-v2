@@ -1,25 +1,22 @@
+import { Request, Response } from 'express';
+import { StatusCodes } from 'http-status-codes';
 import { catchAsync } from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
-import { StatusCodes } from 'http-status-codes';
 import AppError from '../../errors/AppError';
 import { ReceiptService } from './receipt.service';
 
-// ✅ Create Receipt
-const createReceipt = catchAsync(async (req, res) => {
-  const userId = req.userId;
+// ─── Create Receipt ───────────────────────────────────────────────────────────
+const createReceipt = catchAsync(async (req: Request, res: Response) => {
+  if (!req.userId)
+    throw new AppError(StatusCodes.UNAUTHORIZED, 'Unauthorized access!');
 
-  if (!userId) {
-    throw new AppError(StatusCodes.UNAUTHORIZED, 'Unauthorized');
-  }
-
-  if (!req.file) {
+  if (!req.file)
     throw new AppError(StatusCodes.BAD_REQUEST, 'PDF file is required');
-  }
 
   const result = await ReceiptService.createReceiptIntoDB(
     req.body,
-    userId,
-    req.file, // 👈 pass file only
+    req.userId,
+    req.file,
   );
 
   sendResponse(res, {
@@ -30,15 +27,15 @@ const createReceipt = catchAsync(async (req, res) => {
   });
 });
 
-// ✅ Get All Receipts
-const getAllReceipts = catchAsync(async (req, res) => {
-  const userId = req.userId;
+// ─── Get All Receipts ─────────────────────────────────────────────────────────
+const getAllReceipts = catchAsync(async (req: Request, res: Response) => {
+  if (!req.userId)
+    throw new AppError(StatusCodes.UNAUTHORIZED, 'Unauthorized access!');
 
-  if (!userId) {
-    throw new AppError(StatusCodes.UNAUTHORIZED, 'Unauthorized');
-  }
-
-  const result = await ReceiptService.getAllReceiptsFromDB(userId, req.query);
+  const result = await ReceiptService.getAllReceiptsFromDB(
+    req.userId,
+    req.query,
+  );
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -48,19 +45,13 @@ const getAllReceipts = catchAsync(async (req, res) => {
   });
 });
 
-// ✅ Get Single
-const getReceiptById = catchAsync(async (req, res) => {
-  const userId = req.userId;
+// ─── Get Single Receipt ───────────────────────────────────────────────────────
+const getReceiptById = catchAsync(async (req: Request, res: Response) => {
+  if (!req.userId)
+    throw new AppError(StatusCodes.UNAUTHORIZED, 'Unauthorized access!');
+
   const { id } = req.params as { id: string };
-
-  if (!userId) {
-    throw new AppError(StatusCodes.UNAUTHORIZED, 'Unauthorized');
-  }
-
-  if (!id) {
-    throw new AppError(StatusCodes.BAD_REQUEST, 'Receipt ID is required');
-  }
-  const result = await ReceiptService.getReceiptByIdFromDB(id, userId);
+  const result = await ReceiptService.getReceiptByIdFromDB(id, req.userId);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -70,32 +61,35 @@ const getReceiptById = catchAsync(async (req, res) => {
   });
 });
 
-// ✅ Send PDF (for future use)
-const sendReceiptPdf = catchAsync(async (req, res) => {
-  const userId = req.userId;
+// ─── Delete Receipt ───────────────────────────────────────────────────────────
+const deleteReceipt = catchAsync(async (req: Request, res: Response) => {
+  if (!req.userId)
+    throw new AppError(StatusCodes.UNAUTHORIZED, 'Unauthorized access!');
+
   const { id } = req.params as { id: string };
 
-  if (!userId) {
-    throw new AppError(StatusCodes.UNAUTHORIZED, 'Unauthorized');
-  }
-
-  if (!id) {
-    throw new AppError(StatusCodes.BAD_REQUEST, 'Receipt ID is required');
-  }
-
-  await ReceiptService.sendReceiptPdf(id, userId);
+  await ReceiptService.deleteReceiptFromDB(id, req.userId);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
-    message: 'PDF sent successfully',
-    data: null,
+    message: 'Receipt deleted successfully',
   });
 });
 
-export const ReceiptController = {
+// ─── Download PDF ─────────────────────────────────────────────────────────────
+// NOTE: does NOT use sendResponse — streams the PDF binary directly to the client
+const downloadPdf = catchAsync(async (req: Request, res: Response) => {
+  if (!req.userId)
+    throw new AppError(StatusCodes.UNAUTHORIZED, 'Unauthorized access!');
+  const { id } = req.params as { id: string };
+  await ReceiptService.downloadReceiptPdf(id, req.userId, res);
+});
+
+export const ReceiptControllers = {
   createReceipt,
   getAllReceipts,
   getReceiptById,
-  sendReceiptPdf,
+  deleteReceipt,
+  downloadPdf,
 };

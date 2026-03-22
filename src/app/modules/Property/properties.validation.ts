@@ -4,12 +4,12 @@ import { z } from 'zod';
 const createPropertyValidationSchema = z.object({
   body: z.object({
     name: z
-      .string({ required_error: 'Property name is required' })
+      .string({ message: 'Property name is required' })
       .min(1, 'Property name is required')
       .max(100, 'Property name cannot exceed 100 characters')
       .trim(),
     address: z
-      .string({ required_error: 'Address is required' })
+      .string({ message: 'Address is required' })
       .min(1, 'Address is required')
       .max(200, 'Address cannot exceed 200 characters')
       .trim(),
@@ -38,7 +38,7 @@ const updatePropertyValidationSchema = z.object({
 const addUnitValidationSchema = z.object({
   body: z.object({
     name: z
-      .string({ required_error: 'Unit name is required' })
+      .string({ message: 'Unit name is required' })
       .min(1, 'Unit name is required')
       .max(50, 'Unit name cannot exceed 50 characters')
       .trim(),
@@ -49,7 +49,7 @@ const addUnitValidationSchema = z.object({
 const updateUnitValidationSchema = z.object({
   body: z.object({
     name: z
-      .string({ required_error: 'Unit name is required' })
+      .string({ message: 'Unit name is required' })
       .min(1, 'Unit name is required')
       .max(50, 'Unit name cannot exceed 50 characters')
       .trim(),
@@ -60,34 +60,25 @@ const updateUnitValidationSchema = z.object({
 const assignTenantValidationSchema = z.object({
   body: z.object({
     name: z
-      .string({ required_error: 'Tenant name is required' })
+      .string({ message: 'Tenant name is required' })
       .min(1, 'Tenant name is required')
       .max(100, 'Tenant name cannot exceed 100 characters')
       .trim(),
     phone: z
-      .string({ required_error: 'Phone number is required' })
+      .string({ message: 'Phone number is required' })
       .min(1, 'Phone number is required')
       .trim(),
     rentStartDate: z
-      .string({ required_error: 'Rent start date is required' })
+      .string({ message: 'Rent start date is required' })
       .min(1, 'Rent start date is required'),
     rentAmount: z
-      .number({ required_error: 'Rent amount is required' })
+      .number({ message: 'Rent amount is required' })
       .min(0, 'Rent amount cannot be negative'),
     waterBill: z.number().min(0).optional(),
     gasBill: z.number().min(0).optional(),
     otherBills: z.number().min(0).optional(),
   }),
 });
-
-export const PropertyValidation = {
-  createPropertyValidationSchema,
-  updatePropertyValidationSchema,
-  addUnitValidationSchema,
-  updateUnitValidationSchema,
-  assignTenantValidationSchema,
-  clearTenantValidationSchema,
-};
 
 // ─── Clear Tenant ─────────────────────────────────────────────────────────────
 const clearTenantValidationSchema = z.object({
@@ -99,3 +90,12 @@ const clearTenantValidationSchema = z.object({
       .optional(),
   }),
 });
+
+export const PropertyValidation = {
+  createPropertyValidationSchema,
+  updatePropertyValidationSchema,
+  addUnitValidationSchema,
+  updateUnitValidationSchema,
+  assignTenantValidationSchema,
+  clearTenantValidationSchema,
+};
